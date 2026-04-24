@@ -1,0 +1,35 @@
+service: payments-api
+owner: platform-team
+
+slos:
+  - name: availability
+    objective: 99.9
+    window: 30d
+    sli:
+      kind: ratio
+      good_events: 'rate(http_requests_total{job="payments-api",status!~"5.."}[5m])'
+      valid_events: 'rate(http_requests_total{job="payments-api"}[5m])'
+    labels:
+      tier: critical
+      pagerduty_service: payments
+
+  - name: latency-p95-500ms
+    objective: 99
+    window: 28d
+    sli:
+      kind: latency_threshold
+      query: 'histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{job="payments-api"}[5m])))'
+      threshold_seconds: 0.5
+    labels:
+      tier: critical
+      pagerduty_service: payments
+
+  - name: webhook-delivery
+    objective: 99.5
+    window: 7d
+    sli:
+      kind: ratio
+      good_events: 'rate(webhook_deliveries_total{outcome="success"}[5m])'
+      valid_events: 'rate(webhook_deliveries_total{}[5m])'
+    labels:
+      tier: standard
