@@ -18,12 +18,16 @@ and you're done. No daemon to run, no controller to install, no SaaS.
 
 ## Why I wrote this
 
-I needed SLOs in a hurry on a contract last year — fragmented
-observability, MTTR pressure, the usual — and didn't want to spin up
-yet another component (Sloth, Pyrra, OpenSLO) just to manage rules.
-A CLI that emits plain YAML/JSON felt about right: keep your
-hand-tuned rules in the same repo, regenerate the SLO ones when the
-contract changes, diff them in PRs.
+I needed SLOs in a hurry on a contract last year. Observability was
+fragmented across CloudWatch + Grafana + ad-hoc Prometheus, MTTR was
+high, the usual. I started copy-pasting recording-rule templates from
+one service to the next and fixing typos every time. Two weeks of
+that and the YAML schema basically wrote itself.
+
+Looked at Sloth and Pyrra — both well done, both CRDs, which means
+a controller in the cluster I'd have to operate. For a few SLOs
+across a handful of services, a CLI that emits plain YAML+JSON costs
+nothing to run and lives in the service repo where it belongs.
 
 ## Spec example
 
@@ -120,25 +124,30 @@ pytest tests/ -v
 
 ## Design choices
 
-**One config in, two configs out.** The spec lives in your repo as
-the source of truth. PR diffs show what changed. No state machine,
-no controller pulling from a CRD, no extra moving piece in your
-production cluster.
+A few things worth calling out, in case you're considering this for
+real use.
+
+**One config in, two configs out.** No state machine, no controller
+pulling from a CRD. The spec is YAML in your repo. The output is
+YAML+JSON in your repo. Diffs go through normal review. If the
+toolkit gets retired, the generated files keep working unchanged.
 
 **Multi-window multi-burn-rate, not single-threshold alerts.** Single
-threshold alerts on SLOs are noisy: either they fire constantly during
-minor blips or they miss real outages. The Google recipe gives you
-two windows (one short, one long) per severity, which dramatically
-cuts false positives.
+threshold SLO alerts age badly — they spam during minor blips or
+sleep through real outages. The Google recipe gives you two windows
+per severity, which is the kind of thing that sounds like an academic
+detail until you've been paged at 4am for a transient network blip.
 
-**Plain ratio + latency_threshold only.** Other SLI kinds (window-based,
-fraction-of-buckets) are rare in practice. If you need them, the
-`SLI` dataclass in `src/slo_toolkit/spec.py` is 30 lines — extend it.
+**Two SLI kinds: ratio + latency_threshold.** Covers maybe 90% of
+what people actually deploy. Window-based SLIs and bucket-fraction
+SLIs are rare enough that I didn't bother — the `SLI` dataclass is
+30 lines, extend it if you need.
 
-**Generated rules use `clamp_min(_, 1)` on the denominator.** When
-your service has zero traffic, naive ratio rules divide by zero and
-emit NaN, which AlertManager treats as a flap. Clamp avoids that
-without distorting real measurements.
+**`clamp_min(denominator, 1)` everywhere.** Naive ratio rules divide
+by zero when your service has no traffic, and AlertManager treats
+the resulting NaN as a flap. Clamp fixes this without distorting
+real measurements (1 request vs 1000 requests both yield the right
+ratio; 0 requests yields a "perfect" 1.0 instead of an alert storm).
 
 ## Roadmap
 
