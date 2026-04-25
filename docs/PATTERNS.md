@@ -55,7 +55,7 @@ Useful when "fast enough" is part of the contract.
   traffic.
 - Threshold should be 1.5-2x your typical latency, not your best case.
   If your service usually runs at 200ms p95, set the threshold at
-  500ms — leaves room for legitimate spikes (cold caches, rolling
+  500ms -- leaves room for legitimate spikes (cold caches, rolling
   deploys) without false alerts.
 - Latency SLOs and availability SLOs are independent error budgets.
   Don't double-count: a 5xx response shouldn't count toward both
@@ -107,7 +107,7 @@ customer endpoints, etc.).
 - Use a 7d window for outgoing webhooks. Customer-side outages are
   short-lived; a 30d window dilutes the signal too much.
 - Make sure `outcome="success"` only includes 2xx responses from the
-  receiver. 4xx from the receiver is "they rejected our payload" —
+  receiver. 4xx from the receiver is "they rejected our payload" --
   that's their bug, but it still counts as a failed delivery for your
   observability.
 
@@ -129,9 +129,9 @@ For Kafka/Kinesis/RabbitMQ consumers.
 
 - Lag-based SLOs are sensitive to redeploys (consumer restarts cause
   lag spikes that recover quickly). The multi-window burn-rate alerting
-  in this toolkit handles that — short-window blips don't fire pages.
+  in this toolkit handles that -- short-window blips don't fire pages.
 - If your topic has dozens of partitions, `max` over partitions is
-  usually what you want for SLO purposes — the slowest partition
+  usually what you want for SLO purposes -- the slowest partition
   defines user-visible lag.
 
 ## What I avoid
@@ -145,4 +145,4 @@ For Kafka/Kinesis/RabbitMQ consumers.
   end up with under-tuned objectives.
 - **SLO targets above the actual SLA.** If your contract says 99.9%,
   set SLO at 99.95%. Burning the SLO budget should not yet be
-  customer-facing — it's the heads-up before that.
+  customer-facing -- it's the heads-up before that.

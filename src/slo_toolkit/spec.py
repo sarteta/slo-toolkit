@@ -1,4 +1,4 @@
-"""SLO spec — the minimal YAML schema this toolkit consumes.
+"""SLO spec -- the minimal YAML schema this toolkit consumes.
 
 Example:
 

@@ -2,7 +2,7 @@
 
 The dashboard is intentionally minimal: one row per SLO, three panels
 each (current SLI, error budget remaining, burn rate). It works as a
-starting point — Grafana lets you import the JSON, then iterate
+starting point -- Grafana lets you import the JSON, then iterate
 visually from there.
 """
 from __future__ import annotations
@@ -16,7 +16,7 @@ def _panel_sli(slo: SLO, panel_id: int, x: int, y: int) -> dict:
     return {
         "id": panel_id,
         "type": "stat",
-        "title": f"{slo.name} — SLI",
+        "title": f"{slo.name} -- SLI",
         "gridPos": {"x": x, "y": y, "w": 6, "h": 6},
         "targets": [
             {"expr": f"slo:sli_value:{slo.name}", "refId": "A"},
@@ -41,7 +41,7 @@ def _panel_objective(slo: SLO, panel_id: int, x: int, y: int) -> dict:
     return {
         "id": panel_id,
         "type": "stat",
-        "title": f"{slo.name} — Objective",
+        "title": f"{slo.name} -- Objective",
         "gridPos": {"x": x, "y": y, "w": 6, "h": 6},
         "targets": [
             {"expr": f"slo:objective:{slo.name}", "refId": "A"},
@@ -54,7 +54,7 @@ def _panel_error_budget(slo: SLO, panel_id: int, x: int, y: int) -> dict:
     return {
         "id": panel_id,
         "type": "stat",
-        "title": f"{slo.name} — Error budget remaining",
+        "title": f"{slo.name} -- Error budget remaining",
         "gridPos": {"x": x, "y": y, "w": 12, "h": 6},
         "targets": [
             {
@@ -94,7 +94,7 @@ def build_dashboard(spec: Spec) -> dict:
 
     return {
         "uid": f"slo-{spec.service}",
-        "title": f"SLOs — {spec.service}",
+        "title": f"SLOs -- {spec.service}",
         "tags": ["slo", "auto-generated", spec.owner],
         "schemaVersion": 38,
         "version": 1,

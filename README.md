@@ -16,18 +16,16 @@ and you're done. No daemon to run, no controller to install, no SaaS.
 
 ![demo](./examples/demo.png)
 
-## Why I wrote this
+```mermaid
+flowchart LR
+    Y[spec.yml<br/>SLO definitions] --> CLI[slo-toolkit CLI]
+    CLI --> P[prometheus rules.yml<br/>recording + multi-window burn-rate alerts]
+    CLI --> G[grafana dashboard.json<br/>SLI / objective / error budget]
+    P --> PR[Prometheus]
+    G --> GF[Grafana]
+```
 
-I needed SLOs in a hurry on a contract last year. Observability was
-fragmented across CloudWatch + Grafana + ad-hoc Prometheus, MTTR was
-high, the usual. I started copy-pasting recording-rule templates from
-one service to the next and fixing typos every time. Two weeks of
-that and the YAML schema basically wrote itself.
-
-Looked at Sloth and Pyrra — both well done, both CRDs, which means
-a controller in the cluster I'd have to operate. For a few SLOs
-across a handful of services, a CLI that emits plain YAML+JSON costs
-nothing to run and lives in the service repo where it belongs.
+Sloth and Pyrra do similar work as Kubernetes CRDs. This is a CLI: it emits plain YAML+JSON that lives in your service repo and goes through normal code review. No controller to operate, no SaaS account.
 
 ## Spec example
 
@@ -73,7 +71,7 @@ build/
 
 ## What gets generated for each SLO
 
-**Recording rules** — track SLI value and objective for downstream consumers:
+**Recording rules** -- track SLI value and objective for downstream consumers:
 
 ```yaml
 - record: slo:sli_value:availability
@@ -82,7 +80,7 @@ build/
   expr: 99.9
 ```
 
-**Alerting rules** — the multi-window multi-burn-rate pattern:
+**Alerting rules** -- the multi-window multi-burn-rate pattern:
 
 ```yaml
 - alert: SLOFastBurn_availability
@@ -132,16 +130,9 @@ pulling from a CRD. The spec is YAML in your repo. The output is
 YAML+JSON in your repo. Diffs go through normal review. If the
 toolkit gets retired, the generated files keep working unchanged.
 
-**Multi-window multi-burn-rate, not single-threshold alerts.** Single
-threshold SLO alerts age badly — they spam during minor blips or
-sleep through real outages. The Google recipe gives you two windows
-per severity, which is the kind of thing that sounds like an academic
-detail until you've been paged at 4am for a transient network blip.
+**Multi-window multi-burn-rate, not single-threshold alerts.** Single threshold SLO alerts age badly: they spam during minor blips or sleep through real outages. The Google recipe gives you two windows per severity.
 
-**Two SLI kinds: ratio + latency_threshold.** Covers maybe 90% of
-what people actually deploy. Window-based SLIs and bucket-fraction
-SLIs are rare enough that I didn't bother — the `SLI` dataclass is
-30 lines, extend it if you need.
+**Two SLI kinds: ratio + latency_threshold.** Covers most of what people actually deploy. Window-based SLIs and bucket-fraction SLIs are not implemented; the `SLI` dataclass is 30 lines, extend it if needed.
 
 **`clamp_min(denominator, 1)` everywhere.** Naive ratio rules divide
 by zero when your service has no traffic, and AlertManager treats
@@ -153,13 +144,13 @@ ratio; 0 requests yields a "perfect" 1.0 instead of an alert storm).
 
 See [`docs/PATTERNS.md`](./docs/PATTERNS.md) for ready-to-use SLO
 definitions across HTTP availability, latency, background jobs,
-webhook delivery, and consumer lag — with tuning notes for each.
+webhook delivery, and consumer lag -- with tuning notes for each.
 
 ## Roadmap
 
 - [ ] Burn-rate alert tuning per window length (the workbook has a
       table for 28d/30d/90d combinations)
-- [ ] OpenSLO compatibility — accept the OpenSLO YAML as input too
+- [ ] OpenSLO compatibility -- accept the OpenSLO YAML as input too
 - [ ] Sloth-format export for users already on Sloth
 - [ ] Datadog monitor JSON output
 

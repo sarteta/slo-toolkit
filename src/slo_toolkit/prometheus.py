@@ -39,7 +39,7 @@ def _sli_expr(slo: SLO) -> str:
         )
     if sli.kind == "latency_threshold":
         # We treat the SLI as the fraction of requests faster than threshold.
-        # The user provided a quantile query — we adapt it: the ratio of
+        # The user provided a quantile query -- we adapt it: the ratio of
         # fast requests can be computed differently in practice. Here we
         # generate an alerting expression that fires when the quantile
         # exceeds the threshold for a sustained period. Recording rule

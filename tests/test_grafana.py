@@ -26,7 +26,7 @@ def test_render_json_is_valid():
     s = spec_module.load(EXAMPLE)
     out = grafana.render_json(s)
     parsed = json.loads(out)
-    assert parsed["title"] == "SLOs — payments-api"
+    assert parsed["title"] == "SLOs -- payments-api"
 
 
 def test_panels_have_unique_ids():
