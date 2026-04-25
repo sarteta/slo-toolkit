@@ -149,6 +149,12 @@ the resulting NaN as a flap. Clamp fixes this without distorting
 real measurements (1 request vs 1000 requests both yield the right
 ratio; 0 requests yields a "perfect" 1.0 instead of an alert storm).
 
+## Common SLO patterns
+
+See [`docs/PATTERNS.md`](./docs/PATTERNS.md) for ready-to-use SLO
+definitions across HTTP availability, latency, background jobs,
+webhook delivery, and consumer lag — with tuning notes for each.
+
 ## Roadmap
 
 - [ ] Burn-rate alert tuning per window length (the workbook has a
