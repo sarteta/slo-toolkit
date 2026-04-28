@@ -36,6 +36,13 @@ import yaml
 SUPPORTED_WINDOWS = {"7d", "28d", "30d", "90d"}
 SLI_KINDS = {"ratio", "latency_threshold"}
 
+_WINDOW_MINUTES = {
+    "7d": 7 * 24 * 60,
+    "28d": 28 * 24 * 60,
+    "30d": 30 * 24 * 60,
+    "90d": 90 * 24 * 60,
+}
+
 
 @dataclass
 class SLI:
@@ -58,6 +65,15 @@ class SLO:
 
     def error_budget_pct(self) -> float:
         return round(100 - self.objective, 4)
+
+    def error_budget_minutes(self) -> float:
+        """Total error budget in minutes for the SLO window.
+
+        Reports the absolute downtime budget on-callers think in. A 99.9%
+        availability SLO over 30 days yields 43.2 minutes — that is the
+        figure that ends up in incident reviews, not 0.1%.
+        """
+        return round(_WINDOW_MINUTES[self.window] * (100 - self.objective) / 100, 2)
 
 
 @dataclass
