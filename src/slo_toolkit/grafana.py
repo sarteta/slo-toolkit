@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 
+from .prometheus import _metric_name
 from .spec import SLO, Spec
 
 
@@ -19,7 +20,7 @@ def _panel_sli(slo: SLO, panel_id: int, x: int, y: int) -> dict:
         "title": f"{slo.name} -- SLI",
         "gridPos": {"x": x, "y": y, "w": 6, "h": 6},
         "targets": [
-            {"expr": f"slo:sli_value:{slo.name}", "refId": "A"},
+            {"expr": f"slo:sli_value:{_metric_name(slo.name)}", "refId": "A"},
         ],
         "fieldConfig": {
             "defaults": {
@@ -44,7 +45,7 @@ def _panel_objective(slo: SLO, panel_id: int, x: int, y: int) -> dict:
         "title": f"{slo.name} -- Objective",
         "gridPos": {"x": x, "y": y, "w": 6, "h": 6},
         "targets": [
-            {"expr": f"slo:objective:{slo.name}", "refId": "A"},
+            {"expr": f"slo:objective:{_metric_name(slo.name)}", "refId": "A"},
         ],
         "fieldConfig": {"defaults": {"unit": "percent"}},
     }

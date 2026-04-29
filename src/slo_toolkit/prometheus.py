@@ -83,6 +83,18 @@ def _common_labels(spec: Spec, slo: SLO) -> dict[str, str]:
     return base
 
 
+def _metric_name(s: str) -> str:
+    """Sanitize for Prometheus metric / record names.
+
+    Spec allows hyphens in SLO names (UX-friendly: ``latency-p95-500ms``)
+    but Prometheus rule/record names must match ``[a-zA-Z_:][a-zA-Z0-9_:]*``.
+    Map ``-`` to ``_`` so ``latency-p95-500ms`` becomes ``latency_p95_500ms``
+    in the emitted rule names while keeping the human-readable name in
+    labels.
+    """
+    return s.replace("-", "_")
+
+
 def build_rules(spec: Spec) -> dict:
     """Return the YAML-ready dict that goes into a Prometheus rules file."""
     groups: list[dict] = []
@@ -93,12 +105,12 @@ def build_rules(spec: Spec) -> dict:
             "interval": "30s",
             "rules": [
                 {
-                    "record": f"slo:sli_value:{slo.name}",
+                    "record": f"slo:sli_value:{_metric_name(slo.name)}",
                     "expr": _sli_expr(slo),
                     "labels": common,
                 },
                 {
-                    "record": f"slo:objective:{slo.name}",
+                    "record": f"slo:objective:{_metric_name(slo.name)}",
                     "expr": str(slo.objective),
                     "labels": common,
                 },
@@ -108,7 +120,7 @@ def build_rules(spec: Spec) -> dict:
             "name": f"slo:{spec.service}:{slo.name}:alerting",
             "rules": [
                 {
-                    "alert": f"SLOFastBurn_{slo.name}",
+                    "alert": f"SLOFastBurn_{_metric_name(slo.name)}",
                     "expr": _alert_expr(slo, short_window="5m", long_window="1h", burn_rate=14.4),
                     "for": "2m",
                     "labels": {**common, "severity": "page", "burn_rate": "fast"},
@@ -122,7 +134,7 @@ def build_rules(spec: Spec) -> dict:
                     },
                 },
                 {
-                    "alert": f"SLOSlowBurn_{slo.name}",
+                    "alert": f"SLOSlowBurn_{_metric_name(slo.name)}",
                     "expr": _alert_expr(slo, short_window="30m", long_window="6h", burn_rate=6),
                     "for": "15m",
                     "labels": {**common, "severity": "ticket", "burn_rate": "slow"},

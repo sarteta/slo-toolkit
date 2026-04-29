@@ -73,3 +73,25 @@ def test_labels_inherited_from_spec():
     assert labels["owner"] == "platform-team"
     # tier comes from the SLO itself
     assert labels.get("tier") == "critical"
+
+
+def test_record_names_replace_hyphens_with_underscores():
+    """Prometheus rule names must match [a-zA-Z_:][a-zA-Z0-9_:]* — hyphens are
+    illegal. SLO names with hyphens (latency-p95-500ms) must map to
+    slo:sli_value:latency_p95_500ms in the emitted rules."""
+    import re
+    s = spec_module.load(EXAMPLE)
+    out = prometheus.build_rules(s)
+    # Slugs that contain hyphens in the YAML
+    hyphen_slos = [slo.name for slo in s.slos if "-" in slo.name]
+    assert hyphen_slos, "test fixture must include at least one hyphenated SLO name"
+
+    record_pattern = re.compile(r"^[a-zA-Z_:][a-zA-Z0-9_:]*$")
+    for group in out["groups"]:
+        for rule in group["rules"]:
+            name = rule.get("record") or rule.get("alert")
+            assert record_pattern.match(name), (
+                f"rule name {name!r} fails Prometheus naming regex"
+            )
+            # Specifically: no hyphens
+            assert "-" not in name, f"rule name {name!r} still has hyphens"
