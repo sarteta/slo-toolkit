@@ -142,7 +142,7 @@ ratio; 0 requests yields a "perfect" 1.0 instead of an alert storm).
 
 **Budget reported in minutes, not just percent.** `SLO.error_budget_minutes()`
 returns the absolute downtime budget (e.g. 43.2 minutes for 30d/99.9%).
-That is the figure on-callers and incident reviewers think in — "we
+That is the figure on-callers and incident reviewers think in. "We
 have 7 minutes left in this window" reads better than "0.016% remaining".
 
 ## Common SLO patterns
