@@ -1,6 +1,7 @@
 # slo-toolkit
 
 [![tests](https://github.com/sarteta/slo-toolkit/actions/workflows/tests.yml/badge.svg)](https://github.com/sarteta/slo-toolkit/actions/workflows/tests.yml)
+[![docker](https://github.com/sarteta/slo-toolkit/actions/workflows/docker.yml/badge.svg)](https://github.com/sarteta/slo-toolkit/actions/workflows/docker.yml)
 [![python](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue)](https://www.python.org)
 [![license](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
 

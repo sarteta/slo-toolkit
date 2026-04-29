@@ -1,0 +1,16 @@
+name: docker
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t slo-toolkit:ci .
+      - name: Show image size
+        run: docker images slo-toolkit:ci
